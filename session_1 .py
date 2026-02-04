@@ -56,3 +56,9 @@ else:
 # Step 8: Output results
 print("Robot Type:", robot_type)
 print("Industry: NVIDIA Jetson Drone Systems")
+
+
+#OUTPUT 
+
+Robot Type: Aerial Autonomous Robot
+Industry: NVIDIA Jetson Drone Systems
