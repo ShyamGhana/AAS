@@ -18,3 +18,7 @@ edge = np.sqrt(Gx**2 + Gy**2)
 # Step 5: Output result (as per instructions)
 print("Output:", int(edge))
 print("Industry: Autonomous Driving")
+
+#OUTPUT 
+Output: 13
+Industry: Autonomous Driving
