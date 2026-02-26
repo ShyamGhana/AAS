@@ -19,3 +19,7 @@ gray = 0.3*R + 0.59*G + 0.11*B
 # Step 5: Output result (as per instructions)
 print("Output:", int(gray))
 print("Industry: Vision AI")
+
+#OUTPUT 
+Output: 164
+Industry: Vision AI
