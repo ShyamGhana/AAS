@@ -33,3 +33,9 @@ else:
 # Step 5: Output result (as per instructions)
 print("Output:", robot_status)
 print("Industry: Google Robotics")
+
+#OUTPUT 
+
+Publishing Twist Message...
+Output: Robot Moves
+Industry: Google Robotics
