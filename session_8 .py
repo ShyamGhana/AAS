@@ -20,3 +20,7 @@ u = f * X / Z
 # Step 5: Output result (as per instructions)
 print("Output:", int(u), "px")
 print("Industry: AR/VR Systems")
+
+#OUTPUT 
+Output: 300 px
+Industry: AR/VR Systems
