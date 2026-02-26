@@ -31,5 +31,7 @@ min_value = optimization_function(min_x)
 print("Output: x =", min_x)
 print("Industry: AI Ops Optimization")
 
-
+# OUTPUT 
+Output: x = 3
+Industry: AI Ops Optimization
 
