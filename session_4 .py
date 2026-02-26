@@ -21,3 +21,7 @@ speed = distance / time
 # Step 5: Output result (as per instructions)
 print("Output:", speed, "m/s")
 print("Industry: Apple Robotics")
+
+#OUTPUT 
+Output: 2.5 m/s
+Industry: Apple Robotics
