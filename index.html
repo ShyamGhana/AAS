@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCL Particle Filter — ISS Localization</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">MCL·<span>ISS</span>·LOCALIZATION</div>
+  <div class="header-meta">
+    <div><span class="status-dot"></span>PARTICLE FILTER ACTIVE</div>
+    <div>Monte Carlo Localization — 500 Particles</div>
+  </div>
+</header>
+
+<div class="main-grid">
+
+  <div class="panel canvas-wrap">
+    <div class="panel-title"><span class="icon">🛰</span> ISS MODULE MAP — BELIEF DISTRIBUTION</div>
+    <canvas id="mapCanvas"></canvas>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#00d4ff;opacity:0.6"></div>Particle cloud</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b35"></div>Estimated pose</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#39ff14"></div>True pose (robot)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffffff;opacity:0.3"></div>ISS walls</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffd700;opacity:0.5"></div>Landmarks</div>
+    </div>
+    <div class="info-bar">
+      <kbd>CLICK</kbd> set robot pose &nbsp;|&nbsp;
+      <kbd>AUTO</kbd> autonomous motion &nbsp;|&nbsp;
+      <kbd>STEP</kbd> single update &nbsp;|&nbsp;
+      <kbd>RESET</kbd> reinitialize particles
+    </div>
+  </div>
+
+  <div class="panel controls">
+    <div class="panel-title"><span class="icon">⚙</span> FILTER PARAMETERS</div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Particle Count</div>
+      <div class="slider-row">
+        <span class="slider-name">N Particles</span>
+        <input type="range" id="numParticles" min="50" max="1000" value="500" step="50">
+        <span class="val-badge" id="numParticlesVal">500</span>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Motion Noise Model</div>
+      <div class="slider-row">
+        <span class="slider-name">Translation σ</span>
+        <input type="range" id="motionTransNoise" min="1" max="30" value="8" step="1">
+        <span class="val-badge" id="motionTransNoiseVal">8</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-name">Rotation σ (°)</span>
+        <input type="range" id="motionRotNoise" min="1" max="30" value="6" step="1">
+        <span class="val-badge" id="motionRotNoiseVal">6</span>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Sensor Noise Model</div>
+      <div class="slider-row">
+        <span class="slider-name">Range σ</span>
+        <input type="range" id="sensorRangeNoise" min="1" max="40" value="12" step="1">
+        <span class="val-badge" id="sensorRangeNoiseVal">12</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-name">Bearing σ (°)</span>
+        <input type="range" id="sensorBearNoise" min="1" max="20" value="5" step="1">
+        <span class="val-badge" id="sensorBearNoiseVal">5</span>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Resampling</div>
+      <div class="slider-row">
+        <span class="slider-name">Alpha Slow</span>
+        <input type="range" id="alphaSlow" min="0" max="10" value="1" step="1">
+        <span class="val-badge" id="alphaSlowVal">0.001</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-name">Alpha Fast</span>
+        <input type="range" id="alphaFast" min="0" max="10" value="5" step="1">
+        <span class="val-badge" id="alphaFastVal">0.050</span>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Motion Speed</div>
+      <div class="slider-row">
+        <span class="slider-name">Step Size</span>
+        <input type="range" id="stepSize" min="5" max="40" value="15" step="1">
+        <span class="val-badge" id="stepSizeVal">15</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" id="btnAuto">▶ AUTO</button>
+      <button class="btn" id="btnStep">STEP</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btnReset">REINIT</button>
+      <button class="btn danger" id="btnKidnap">KIDNAP</button>
+    </div>
+  </div>
+
+  <div class="panel stats-panel">
+    <div class="panel-title"><span class="icon">📊</span> TELEMETRY</div>
+    <div class="stat-grid">
+      <div class="stat-cell">
+        <span class="stat-val" id="statErr">—</span>
+        <div class="stat-lbl">Pos Error (px)</div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-val orange" id="statIter">0</span>
+        <div class="stat-lbl">Iterations</div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-val green" id="statNEff">—</span>
+        <div class="stat-lbl">N_eff</div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-val" id="statEntropy">—</span>
+        <div class="stat-lbl">Entropy</div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-val orange" id="statConv">—</span>
+        <div class="stat-lbl">Converged</div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-val" id="statFPS">—</span>
+        <div class="stat-lbl">FPS</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel log-panel">
+    <div class="panel-title"><span class="icon">🖥</span> SYSTEM LOG</div>
+    <div class="log-body" id="logBody"></div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
